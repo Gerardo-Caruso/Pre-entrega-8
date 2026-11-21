@@ -71,49 +71,54 @@ const productos = [
   },
 ];
 
-const carrito = [];
+//Inicializamos carrito con localStorage. En lugar de arrancar con un array vacio chequea si hay algo guardado.
+const carrito = JSON.parse(localStorage.getItem("carrito")) ?? []; //JSON.parse() convierte el texto de vuelta a objeto/array para poder usarlo en el codigo
 
-function imprimirProductosEnHTML(productos) {
+function imprimirProductosEnHTML(listaProductos) {
+  const contenedorProductos = document.getElementById("productos");
+  contenedorProductos.innerHTML = ""; //vacia container antes para que no se dupliquen productos
 
-const contenedorProductos = document.getElementById("productos");
-contenedorProductos.innerHTML = "" //vacia container antes para que no se dupliquen productos
+  for (const producto of listaProductos) {
+    const { id, nombre, descripcion, precio, imagen } = producto;
 
-//recorremos array con FOR para crear una card por cada elemento
-for (const producto of productos) {
-    const card = document.createElement("article"); //creo la etiqueta article
-    //agregamos contenido a la card con metodo innerHTML usando template strings
+    const card = document.createElement("article");
     card.className = "card";
-    
     card.innerHTML = `
-    <img src="${producto.imagen}" alt="${producto.nombre}" class="card-img-top">
-    <h3>${producto.nombre}</h3>
-    <p>${producto.descripcion}</p>
-    <p class="precio">$${producto.precio}</p>
-    <button class="card-boton" id="${producto.id}${producto.nombre}">Agregar al carrito</button>
-`;
+      <img src="${imagen}" alt="${nombre}" class="card-img-top">
+      <h3>${nombre}</h3>
+      <p>${descripcion}</p>
+      <p class="precio">$${precio}</p>
+      <button class="card-boton" id="boton-agregar-${id}">Agregar al carrito</button>
+    `;
 
+    contenedorProductos.append(card);
 
-    contenedorProductos.append(card);  //para agregar la card creada en el contenedor, necesito el metodo append() o appendchild()
-    
-    const cardButton = document.getElementById(`${producto.id}${producto.nombre}`) //agregamos el evento para el boton de la tarjeta
+    // Buscamos el botón usando el mismo ID que definimos arriba
+    const cardButton = document.getElementById(`boton-agregar-${id}`); //agregamos el evento para el boton de la tarjeta
     cardButton.addEventListener("click", () => {
-      carrito.push(producto); //cada click para agregar al carrito y luego lo actualiza
+      carrito.push(producto);
+      localStorage.setItem("carrito", JSON.stringify(carrito)); //JSON.stringify() convierte objeto/array a texto para poder guardarlo en storage
       imprimirCarrito(carrito);
-    } )
+    });
   }
 }
+
+//Imprimimos carrito
 
 function imprimirCarrito(array) {
   const contenedorCarrito = document.getElementById("carrito")
   contenedorCarrito.innerHTML = "";
 
-  for (const elemento of array) {
-    const div = document.createElement("div")
-    div.innerHTML = `<p>${elemento.nombre}</p>
-    <p>${elemento.precio}</p>`;
+  array.length === 0 ? (contenedorCarrito.innerHTML = "<p>No hay nada en el carrito.</p>")
 
-    contenedorCarrito.append(div);
-  }
+  : array.forEach(({ nombre, precio }) => {
+        const div = document.createElement("div");
+        div.innerHTML = `
+          <p>${nombre}</p>
+          <p>$${precio}</p>
+        `;
+        contenedorCarrito.append(div);
+      });
 
 }
 
@@ -124,16 +129,9 @@ formularioAgregarProducto.addEventListener("submit", (event) => { //siempre reci
   event.preventDefault(); // previene refresque de la pantalla que es un comportamiento por defecto
 
   const nombre = document.getElementById("input-nombre").value; //agregamos .value para obtener lo ingresado en los input
-  console.log(nombre);
-
   const precio = parseFloat(document.getElementById("input-precio").value);
-  console.log(precio); 
-
   const imagen = document.getElementById("input-imagen").value;
-  console.log(imagen); 
-
   const descripcion = document.getElementById("input-descripcion").value;
-  console.log(descripcion); 
 
   //agregamos el nuevo producto
 
@@ -168,6 +166,7 @@ formularioBusqueda.onsubmit = (event) => {
 };
 
 imprimirProductosEnHTML(productos);
+imprimirCarrito(carrito);
 
 
 
