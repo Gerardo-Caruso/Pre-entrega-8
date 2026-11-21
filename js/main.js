@@ -153,17 +153,16 @@ formularioAgregarProducto.addEventListener("submit", (event) => { //siempre reci
 
 });
 
-const formularioBusqueda = document.getElementById("form-busqueda");
-formularioBusqueda.onsubmit = (event) => {
-  event.preventDefault()
+const inputBusqueda = document.getElementById("input-busqueda");
+inputBusqueda.addEventListener("input", (event) => {
 
-  const busqueda = document.getElementById("input-busqueda").value //lo que ingreso el usuario en el input de busqueda
+  const busqueda = event.target.value.toLowerCase() //lo que ingreso el usuario en el input de busqueda
 
-  const productosFiltrados = productos.filter((producto) => producto.nombre.toLowerCase().includes(busqueda.toLowerCase())
+  const productosFiltrados = productos.filter((producto) => producto.nombre.toLowerCase().includes(busqueda)
 );
 
   imprimirProductosEnHTML(productosFiltrados)
-};
+});
 
 imprimirProductosEnHTML(productos);
 imprimirCarrito(carrito);
